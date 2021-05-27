@@ -1,0 +1,12 @@
+- hosts: docker
+  tasks:
+  - name: TO INSTALL THE WEBSERVER
+    package:
+      name: httpd
+      state: present
+  - name: TO CONFIGURE THE WEBPAGES
+    copy:
+      content: "!!! SUCCESSFULLY CONFIGURED WEBSERVER INSIDE DOCKER CONTAINER & AND ALSO UPDATED HOSTS FILE THROUGH ANSIBLE !!!"
+      dest: /var/www/html/index.html
+  - name: TO START THE SERVICES IN DOCKER CONTAINER
+    command: "/usr/sbin/httpd"

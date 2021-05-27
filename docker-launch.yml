@@ -1,0 +1,48 @@
+- hosts: localhost
+  vars_prompt:
+  - name: container_name
+    prompt: "Enter the Container Name"
+    private: no
+
+  tasks:
+  - yum_repository:
+                description: Docker yum
+                name: docker2
+                baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+                gpgcheck: no
+                state: present
+
+  - package:
+           name: "docker-ce-18.09.1-3.el7.x86_64"
+           state: present
+           skip_broken: yes
+
+  - name: Docker service start
+    service:
+           name: docker
+           state: started
+           enabled: yes
+
+  - name: Sdk install
+    command: "pip3 install docker"
+
+  - name: LAUNCHING OUR SSH BASED CONTAINER
+    docker_container:
+      name: "{{ container_name }}"
+      image: sumany15/my_ssh_os:v1
+      state: started
+      interactive: yes
+      tty: yes
+    register: dockercontainer
+
+  - name: DEBUGGING THIS CONTAINER
+    debug:
+      var: dockercontainer.container.NetworkSettings.IPAddress
+
+  - name: UPDATING THE INVENTORY FILE THAT IS OUR IP.TXT FILE
+    blockinfile:
+      path: /root/ip.txt
+      block: |
+             [docker]
+             {{ dockercontainer['container']['NetworkSettings']['IPAddress'] }} ansible_ssh_user=root ansible_ssh_pass=docker  ansible_connection=ssh
+
